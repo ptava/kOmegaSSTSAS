@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kOmegaSSTSAS.H"
+#include "mykOmegaSSTSAS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +38,7 @@ namespace RASModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-tmp<fvScalarMatrix> kOmegaSSTSAS<BasicTurbulenceModel>::Qsas
+tmp<fvScalarMatrix> mykOmegaSSTSAS<BasicTurbulenceModel>::Qsas
 (
     const volScalarField::Internal& S2,
     const volScalarField::Internal& gamma,
@@ -96,7 +96,7 @@ tmp<fvScalarMatrix> kOmegaSSTSAS<BasicTurbulenceModel>::Qsas
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-kOmegaSSTSAS<BasicTurbulenceModel>::kOmegaSSTSAS
+mykOmegaSSTSAS<BasicTurbulenceModel>::mykOmegaSSTSAS
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -187,7 +187,7 @@ kOmegaSSTSAS<BasicTurbulenceModel>::kOmegaSSTSAS
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool kOmegaSSTSAS<BasicTurbulenceModel>::read()
+bool mykOmegaSSTSAS<BasicTurbulenceModel>::read()
 {
     if (kOmegaSST<BasicTurbulenceModel>::read())
     {

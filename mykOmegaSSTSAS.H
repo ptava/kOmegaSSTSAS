@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::RASModels::kOmegaSSTSAS
+    Foam::RASModels::mykOmegaSSTSAS
 
 Group
     grpLESTurbulence
@@ -44,7 +44,7 @@ Description
 
     The model coefficients are
     \verbatim
-        kOmegaSSTSASCoeffs
+        mykOmegaSSTSASCoeffs
         {
             // Default SST coefficients
             alphaK1     0.85;
@@ -77,12 +77,12 @@ Description
     \endverbatim
 
 SourceFiles
-    kOmegaSSTSAS.C
+    mykOmegaSSTSAS.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaSSTSAS_H
-#define kOmegaSSTSAS_H
+#ifndef mykOmegaSSTSAS_H
+#define mykOmegaSSTSAS_H
 
 #include "kOmegaSST.H"
 #include "LESdelta.H"
@@ -95,21 +95,21 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class kOmegaSSTSAS Declaration
+                     Class mykOmegaSSTSAS Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class BasicTurbulenceModel>
-class kOmegaSSTSAS
+class mykOmegaSSTSAS
 :
     public kOmegaSST<BasicTurbulenceModel>
 {
     // Private Member Functions
 
         //- No copy construct
-        kOmegaSSTSAS(const kOmegaSSTSAS&) = delete;
+        mykOmegaSSTSAS(const mykOmegaSSTSAS&) = delete;
 
         //- No copy assignment
-        void operator=(const kOmegaSSTSAS&) = delete;
+        void operator=(const mykOmegaSSTSAS&) = delete;
 
 
 protected:
@@ -150,13 +150,13 @@ public:
 
 
     //- Runtime type information
-    TypeName("kOmegaSSTSAS");
+    TypeName("mykOmegaSSTSAS");
 
 
     // Constructors
 
         //- Construct from components
-        kOmegaSSTSAS
+        mykOmegaSSTSAS
         (
             const alphaField& alpha,
             const rhoField& rho,
@@ -170,7 +170,7 @@ public:
 
 
     //- Destructor
-    virtual ~kOmegaSSTSAS() = default;
+    virtual ~mykOmegaSSTSAS() = default;
 
 
     // Member Functions
@@ -194,7 +194,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "kOmegaSSTSAS.C"
+    #include "mykOmegaSSTSAS.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1,0 +1,13 @@
+EXE_INC = \
+    -I$(FOAM_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(FOAM_SRC)/finiteVolume/lnInclude \
+    -I$(FOAM_SRC)/meshTools/lnInclude \
+    -I$(FOAM_SRC)/transportModels \
+    -I$(FOAM_SRC)/TurbulenceModels/incompressible/lnInclude
+
+EXE_LIBS = \
+    -lturbulenceModels \
+    -lfiniteVolume \
+    -lmeshTools \
+    -lincompressibleTransportModels \
+    -lincompressibleTurbulenceModels

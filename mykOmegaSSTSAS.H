@@ -33,6 +33,8 @@ Group
 Description
     Scale-adaptive URAS model based on the k-omega-SST RAS model.
 
+    Lvk along with its individual are now available in the registry
+
     References:
     \verbatim
         Egorov, Y., & Menter F.R. (2008).
@@ -130,6 +132,11 @@ protected:
             //- Run-time selectable delta model
             autoPtr<Foam::LESdelta> delta_;
 
+        // von Karman length scale
+            volScalarField::Internal C1_;
+            volScalarField::Internal C2_;
+            volScalarField::Internal Lvk_;
+
 
     // Protected Member Functions
 
@@ -182,6 +189,24 @@ public:
         inline const volScalarField& delta() const
         {
             return *delta_;
+        }
+
+        //- Access function to C1
+        inline volScalarField::Internal C1()
+        {
+            return C1_;
+        }
+
+        //- Access function to C2
+        inline volScalarField::Internal C2()
+        {
+            return C2_;
+        }
+
+        //- Access function to von Karman length scale
+        inline volScalarField::Internal Lvk()
+        {
+            return Lvk_;
         }
 };
 

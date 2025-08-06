@@ -50,23 +50,28 @@ tmp<fvScalarMatrix> mykOmegaSSTSAS<BasicTurbulenceModel>::Qsas
         sqrt(this->k_())/(pow025(this->betaStar_)*this->omega_())
     );
 
-    volScalarField::Internal Lvk
+    // casted version of 'this' pointer:
+    mykOmegaSSTSAS* thisPtr =  const_cast<mykOmegaSSTSAS*> (this);
+
+    // force update of new private members C1 and C2
+    thisPtr->C1_ =
     (
-        max
-        (
-            kappa_*sqrt(S2)
-           /(
-                mag(fvc::laplacian(this->U_))()()
-              + dimensionedScalar
-                (
-                    "ROOTVSMALL",
-                    dimensionSet(0, -1, -1, 0, 0),
-                    ROOTVSMALL
-                )
-            ),
-            Cs_*sqrt(kappa_*zeta2_/(beta/this->betaStar_ - gamma))*delta()()
+        kappa_*sqrt(S2)
+        /(
+            mag(fvc::laplacian(this->U_))()()
+            + dimensionedScalar
+            (
+                "ROOTVSMALL",
+                dimensionSet(0, -1, -1, 0, 0),
+                ROOTVSMALL
+            )
         )
     );
+
+    thisPtr->C2_ =
+        Cs_*sqrt(kappa_*zeta2_/(beta/this->betaStar_ - gamma))*delta()();
+
+    thisPtr->Lvk_ = max(C1_,C2_);
 
     return fvm::Su
     (
@@ -75,7 +80,7 @@ tmp<fvScalarMatrix> mykOmegaSSTSAS<BasicTurbulenceModel>::Qsas
         (
             max
             (
-                zeta2_*kappa_*S2*sqr(L/Lvk)
+                zeta2_*kappa_*S2*sqr(L/Lvk_)
               - (2*C_/sigmaPhi_)*this->k_()
                *max
                 (
@@ -174,6 +179,48 @@ mykOmegaSSTSAS<BasicTurbulenceModel>::mykOmegaSSTSAS
             *this,
             this->coeffDict_
         )
+    ),
+
+    C1_
+    (
+         IOobject
+         (
+             IOobject::groupName("C1", alphaRhoPhi.group()),
+             this->runTime_.timeName(),
+             this->mesh_,
+             IOobject::NO_READ,
+             IOobject::NO_WRITE
+         ),
+         this->mesh_,
+	 	 dimensionedScalar(dimensionSet(0, 1, 0, 0, 0), 0.0)
+    ),
+
+    C2_
+    (
+         IOobject
+         (
+             IOobject::groupName("C2", alphaRhoPhi.group()),
+             this->runTime_.timeName(),
+             this->mesh_,
+             IOobject::NO_READ,
+             IOobject::NO_WRITE
+         ),
+         this->mesh_,
+	 	 dimensionedScalar(dimensionSet(0, 1, 0, 0, 0), 0.0)
+    ),
+
+    Lvk_
+    (
+         IOobject
+         (
+             IOobject::groupName("Lvk", alphaRhoPhi.group()),
+             this->runTime_.timeName(),
+             this->mesh_,
+             IOobject::NO_READ,
+             IOobject::AUTO_WRITE
+         ),
+         this->mesh_,
+		 dimensionedScalar(dimensionSet(0, 1, 0, 0, 0), 0.0)
     )
 {
     if (type == typeName)

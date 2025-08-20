@@ -133,9 +133,9 @@ protected:
             autoPtr<Foam::LESdelta> delta_;
 
         // von Karman length scale
-            volScalarField::Internal C1_;
-            volScalarField::Internal C2_;
-            volScalarField::Internal Lvk_;
+            mutable autoPtr<volScalarField> C1_;
+            mutable autoPtr<volScalarField> C2_;
+            mutable autoPtr<volScalarField> Lvk_;
 
 
     // Protected Member Functions
@@ -146,6 +146,21 @@ protected:
             const volScalarField::Internal& S2,
             const volScalarField::Internal& gamma,
             const volScalarField::Internal& beta
+        ) const;
+
+        //- Initialise fields for dumping refinement information
+        virtual void makeDumpField
+        (
+            autoPtr<volScalarField>& fld,
+            const word& name
+        ) const;
+
+        //- Assign computed values
+        template<autoPtr<volScalarField> mykOmegaSSTSAS::* MemberPtr>
+        inline void setDumpField
+        (
+            const scalarField& vals,
+            const word& name
         ) const;
 
 
@@ -192,21 +207,21 @@ public:
         }
 
         //- Access function to C1
-        inline volScalarField::Internal C1()
+        inline const volScalarField& C1()
         {
-            return C1_;
+            return *C1_;
         }
 
         //- Access function to C2
-        inline volScalarField::Internal C2()
+        inline const volScalarField& C2()
         {
-            return C2_;
+            return *C2_;
         }
 
         //- Access function to von Karman length scale
-        inline volScalarField::Internal Lvk()
+        inline const volScalarField& Lvk()
         {
-            return Lvk_;
+            return *Lvk_;
         }
 };
 

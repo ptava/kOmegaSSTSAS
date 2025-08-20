@@ -38,6 +38,65 @@ namespace RASModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
+void mykOmegaSSTSAS<BasicTurbulenceModel>::makeDumpField
+(
+    autoPtr<volScalarField>& fld,
+    const word& name
+) const
+{
+    const bool needCreate = !fld.valid() || (fld->size() != this->mesh_.nCells());
+
+    if (!needCreate) return;
+
+    fld.reset
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name,
+                this->runTime_.timeName(),
+                this->mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh_,
+            dimensionedScalar(dimensionSet(0, 1, 0, 0, 0), Zero)
+        )
+    );
+}
+
+template<class BasicTurbulenceModel>
+template<Foam::autoPtr<Foam::volScalarField>
+         mykOmegaSSTSAS<BasicTurbulenceModel>::* MemberPtr>
+inline void mykOmegaSSTSAS<BasicTurbulenceModel>::setDumpField
+(
+    const scalarField& vals,
+    const word& name
+) const
+{
+    // Sanity check
+    if (vals.size() != this->mesh_.nCells())
+    {
+        FatalErrorInFunction
+            << "Size mismatch for field '" << name << "': vals.size() = "
+            << vals.size() << " vs nCells() = " << this->mesh_.nCells()
+            << exit(FatalError);
+    }
+
+    // Resolve member pointer to actual autoPtr
+    autoPtr<volScalarField>& fld = const_cast<autoPtr<volScalarField>&>(
+        this->*MemberPtr
+    );
+
+    // Ensure field exists and matches current mesh
+    makeDumpField(fld, name);
+
+    // Assign internal values
+    fld->primitiveFieldRef() = vals;
+}
+
+template<class BasicTurbulenceModel>
 tmp<fvScalarMatrix> mykOmegaSSTSAS<BasicTurbulenceModel>::Qsas
 (
     const volScalarField::Internal& S2,
@@ -50,11 +109,8 @@ tmp<fvScalarMatrix> mykOmegaSSTSAS<BasicTurbulenceModel>::Qsas
         sqrt(this->k_())/(pow025(this->betaStar_)*this->omega_())
     );
 
-    // casted version of 'this' pointer:
-    mykOmegaSSTSAS* thisPtr =  const_cast<mykOmegaSSTSAS*> (this);
-
     // force update of new private members C1 and C2
-    thisPtr->C1_ =
+    volScalarField::Internal C1 =
     (
         kappa_*sqrt(S2)
         /(
@@ -68,10 +124,23 @@ tmp<fvScalarMatrix> mykOmegaSSTSAS<BasicTurbulenceModel>::Qsas
         )
     );
 
-    thisPtr->C2_ =
+    volScalarField::Internal C2 =
         Cs_*sqrt(kappa_*zeta2_/(beta/this->betaStar_ - gamma))*delta()();
 
-    thisPtr->Lvk_ = max(C1_,C2_);
+    volScalarField::Internal Lvk = max(C1,C2);
+
+    this->template setDumpField<&mykOmegaSSTSAS<BasicTurbulenceModel>::C1_>
+    (
+        C1.field(), "C1"
+    );
+    this->template setDumpField<&mykOmegaSSTSAS<BasicTurbulenceModel>::C2_>
+    (
+        C2.field(), "C2"
+    );
+    this->template setDumpField<&mykOmegaSSTSAS<BasicTurbulenceModel>::Lvk_>
+    (
+        Lvk.field(), "Lvk"
+    );
 
     return fvm::Su
     (
@@ -80,7 +149,7 @@ tmp<fvScalarMatrix> mykOmegaSSTSAS<BasicTurbulenceModel>::Qsas
         (
             max
             (
-                zeta2_*kappa_*S2*sqr(L/Lvk_)
+                zeta2_*kappa_*S2*sqr(L/Lvk)
               - (2*C_/sigmaPhi_)*this->k_()
                *max
                 (
@@ -179,48 +248,6 @@ mykOmegaSSTSAS<BasicTurbulenceModel>::mykOmegaSSTSAS
             *this,
             this->coeffDict_
         )
-    ),
-
-    C1_
-    (
-         IOobject
-         (
-             IOobject::groupName("C1", alphaRhoPhi.group()),
-             this->runTime_.timeName(),
-             this->mesh_,
-             IOobject::NO_READ,
-             IOobject::NO_WRITE
-         ),
-         this->mesh_,
-	 	 dimensionedScalar(dimensionSet(0, 1, 0, 0, 0), 0.0)
-    ),
-
-    C2_
-    (
-         IOobject
-         (
-             IOobject::groupName("C2", alphaRhoPhi.group()),
-             this->runTime_.timeName(),
-             this->mesh_,
-             IOobject::NO_READ,
-             IOobject::NO_WRITE
-         ),
-         this->mesh_,
-	 	 dimensionedScalar(dimensionSet(0, 1, 0, 0, 0), 0.0)
-    ),
-
-    Lvk_
-    (
-         IOobject
-         (
-             IOobject::groupName("Lvk", alphaRhoPhi.group()),
-             this->runTime_.timeName(),
-             this->mesh_,
-             IOobject::NO_READ,
-             IOobject::AUTO_WRITE
-         ),
-         this->mesh_,
-		 dimensionedScalar(dimensionSet(0, 1, 0, 0, 0), 0.0)
     )
 {
     if (type == typeName)
